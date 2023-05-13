@@ -5,15 +5,13 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-
 
 public class Main extends Application {
 	
 	BorderPane root;
 	
 	TopPane topPane;
-	Game game;
+	Game game; // centerPane
 	BottomPane bottomPane;
 	
 	@Override
@@ -29,6 +27,7 @@ public class Main extends Application {
 		bottomPane = new BottomPane(); // bottom
 		root.setBottom(bottomPane);
 		
+		// Next Level Handler
 		TopPane.getNextLabel().setOnMouseClicked(e -> {
 			String level_handler = "levels/level" + 
         			(topPane.getLevelNumber() + 1) + ".txt";
@@ -41,9 +40,15 @@ public class Main extends Application {
         	topPane.setLeft(new Label("Level #" + topPane.getLevelNumber()));
         });
 		
+//		BottomPane.getDriveLabel().setOnMouseClicked(e -> {
+//			// TODO: do it
+//		});
+		
+		
 		
 		Scene scene = new Scene(root);
 		primaryStage.setResizable(false);
+		primaryStage.setTitle("GAME");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}

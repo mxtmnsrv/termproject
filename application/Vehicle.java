@@ -3,23 +3,26 @@ package application;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Vehicle{
+public class Vehicle {
 
 	private int currentCityId;
 	private int passengerCapacity;
+	
+	// These images are used in getVehicleImage() method
 	private static Image[] images = {
 			(new Image("file:images/car.png")),
-			(new Image("file:images/car.png")),
-			(new Image("file:images/car.png"))
+			(new Image("file:images/minibus.png")),
+			(new Image("file:images/bus.png"))
 	};
 	
-	// There will be different image attributes according to the PASSENGER_CAPACITY !!
+	// Constructor is used in initObjs() method in Game.java
 	public Vehicle(String currentCityId, String passengerCapacity) {
 		
 		this.currentCityId = Integer.parseInt(currentCityId);
 		this.passengerCapacity = Integer.parseInt(passengerCapacity);
 	}
 
+	// Getters
 	public int getCurrentCityId() {
 		return currentCityId;
 	}
@@ -28,6 +31,10 @@ public class Vehicle{
 		return passengerCapacity;
 	}
 	
+	/*
+	Less than 6 passenger capacity use car image, less than 
+	14 use minibus image and greater than 14 use bus image.
+	*/
 	public ImageView getVehicleImage() {
 		if(this.passengerCapacity < 6) {
 			return new ImageView(images[0]);

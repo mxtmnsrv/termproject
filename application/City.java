@@ -3,12 +3,13 @@ package application;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class City{
-	// These are three lines that define the city name, cell id and city id variables
+public class City {
 	private String cityName;
-	private int cityId;
+	private int cityId; // cityId can be {1, 2, 3, ...}
 	private int cellId;
 	private ImageView image;
+	
+	// These images are used in getRandomImageView() method
 	private static Image[] images = {
 			(new Image("file:images/a.png")),
 			(new Image("file:images/b.png")),
@@ -18,24 +19,28 @@ public class City{
 			(new Image("file:images/f.png"))
 	};
 	
-	public City(String cityName,String cellId,String cityId)
-	{
+	// Constructor is used in initObjs() method in Game.java
+	public City(String cityName, String cellId, String cityId) {
 		this.cityName = cityName;
 		this.cityId = Integer.parseInt(cityId);
 		this.cellId = Integer.parseInt(cellId);
 		this.image = getRandomImageView();
 	}
 	
+	// Returns randomly selected ImageView from images array
 	private static ImageView getRandomImageView() {
 		return new ImageView(images[(int) (Math.random() * 6)]);
 	}
 	
+	// Getters
 	public String getCityName() {
 		return cityName;
 	}
+	
 	public int getCellId() {
 		return cellId;
 	}
+	
 	public int getCityId() {
 		return cityId;
 	}

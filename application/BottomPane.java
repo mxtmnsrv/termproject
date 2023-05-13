@@ -8,7 +8,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class BottomPane extends BorderPane {
-	private Label driveLabel;
+	// Label
+	private static Label driveLabel;
 
     // Constants for pane width and height
     private static final int PANE_WIDTH = 500;
@@ -33,6 +34,11 @@ public class BottomPane extends BorderPane {
         // Add padding to the "DRIVE" label
         driveLabel.setPadding(new Insets(45, 20, 0, 0));
 
-        // Add the other label to the left side of the pane
+        // !!!Add the other label to the left side of the pane
+    }
+    
+    // Getters
+    public Label getDriveLabel() {
+    	return driveLabel;
     }
 }
