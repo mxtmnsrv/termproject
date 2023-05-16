@@ -38,7 +38,7 @@ public class BottomPane extends BorderPane {
     }
     
     // Getters
-    public Label getDriveLabel() {
+    public static Label getDriveLabel() {
     	return driveLabel;
     }
 }

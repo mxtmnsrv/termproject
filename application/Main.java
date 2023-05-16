@@ -1,9 +1,13 @@
 package application;
 	
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 public class Main extends Application {
@@ -40,9 +44,38 @@ public class Main extends Application {
         	topPane.setLeft(new Label("Level #" + topPane.getLevelNumber()));
         });
 		
-//		BottomPane.getDriveLabel().setOnMouseClicked(e -> {
-//			// TODO: do it
-//		});
+		
+		// Set an event handler for the DRIVE
+		BottomPane.getDriveLabel().setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                // Check if a city Label has been selected
+                if (game.selectedCity != null) {
+                    
+                	double xo = game.selectedCity.getLayoutX();
+                	double yo = game.selectedCity.getLayoutY();
+//                		Print a message to the console
+//                  	System.out.println(game.selectedCity.getLayoutX());
+//                  	System.out.println(game.selectedCity.getLayoutY());
+//                  	System.out.println("-----");
+                    int endID = Game.getCellID(xo, yo);
+                    game.placePath(endID);
+                    game.selectedCity = null;
+                    // TODO: Vehicle animation >>> Remove path line >>> Update VEHICLE!
+                    
+                    // Create a PauseTransition to wait for 2 seconds
+                    PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                    // When the PauseTransition finishes, remove the polyline from the game pane
+                    pause.setOnFinished(e -> {
+                        game.getChildren().remove(game.polyline);
+                    });
+                    // Start the PauseTransition
+                    pause.play();
+
+                    
+                }
+            }
+        });
 		
 		
 		

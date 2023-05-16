@@ -22,9 +22,13 @@ public class Vehicle {
 		this.passengerCapacity = Integer.parseInt(passengerCapacity);
 	}
 
-	// Getters
+	// Getters and Setters
 	public int getCurrentCityId() {
 		return currentCityId;
+	}
+	
+	public void setCurrentCityId(int id) {
+		this.currentCityId = id;
 	}
 
 	public int getPassengerCapacity() {
