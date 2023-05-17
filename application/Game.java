@@ -19,6 +19,7 @@ public class Game extends Pane {
 	// Used in the DRIVE handler, hence public
 	public Label selectedCity;
 	public Polyline polyline;
+	public ImageView vehicleImage;
 	
 	// Constant for cell size
 	private static final int CELL_SIZE = 50;
@@ -185,18 +186,18 @@ public class Game extends Pane {
 		// Place vehicle in the game (pane)
 		private void placeVehicle(Vehicle vehicle) {
 			// Image of the vehicle
-			ImageView image = vehicle.getVehicleImage();
-			image.setFitHeight(CELL_SIZE);
-			image.setFitWidth(CELL_SIZE);
+			vehicleImage = vehicle.getVehicleImage();
+			vehicleImage.setFitHeight(CELL_SIZE);
+			vehicleImage.setFitWidth(CELL_SIZE);
 			
 			// Place vehicle
 			int cityID = vehicle.getCurrentCityId();
 			int cellId = getCellIdByCityId(cityID);
-			image.setLayoutX(getX(cellId));
-			image.setLayoutY(getY(cellId)+25);
+			vehicleImage.setLayoutX(getX(cellId));
+			vehicleImage.setLayoutY(getY(cellId)+25);
 			
 			// Add it to the game (pane) 
-			getChildren().add(image);
+			getChildren().add(vehicleImage);
 		}
 			
 		// This method is used in placeVehicle() to get cell id 
@@ -258,7 +259,7 @@ public class Game extends Pane {
 			
 			// X=0 : first go left/right then up/down
 			// X=1 : first go up/down then left/right
-			int X = (int) Math.random() * 2;
+			int X = (int) (Math.random() * 2);
 			
 			if(X == 0) {
 				for(int i=0; i<Math.abs(cold); i++) {

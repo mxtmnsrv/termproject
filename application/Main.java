@@ -1,6 +1,8 @@
 package application;
 	
+import javafx.animation.PathTransition;
 import javafx.animation.PauseTransition;
+import javafx.animation.PathTransition.OrientationType;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -63,8 +65,17 @@ public class Main extends Application {
                     game.selectedCity = null;
                     // TODO: Vehicle animation >>> Remove path line >>> Update VEHICLE!
                     
+                    PathTransition path = new PathTransition();
+                    path.setAutoReverse(false);
+                    path.setNode(game.vehicleImage);
+                    path.setPath(game.polyline);
+                    path.setDuration(Duration.seconds(3));
+                    //path.setOrientation();
+                    path.setCycleCount(1);
+                    path.play();
+                    
                     // Create a PauseTransition to wait for 2 seconds
-                    PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                    PauseTransition pause = new PauseTransition(Duration.seconds(50));
                     // When the PauseTransition finishes, remove the polyline from the game pane
                     pause.setOnFinished(e -> {
                         game.getChildren().remove(game.polyline);
