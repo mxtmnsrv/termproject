@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Path2 {
@@ -20,21 +20,19 @@ public class Path2 {
 		boolean[][] map = new boolean[10][10];
 		for(int i=0;i<10;i++) {
 			for(int j=0;j<10;j++) {
-				map[i][j] = true;
+				map[i][j] = true; // true means empty
 			}
 		}
 		
 		int[] temp = Arrays.copyOf(obstacles, obstacles.length);
 		int[] obs = new int[temp.length - 2];
-		int obsIndex = 0;
-
-		for (int i = 0; i < temp.length; i++) {
+		int k = 0;
+		for (int i = 0; i<temp.length; i++) {
 		    if (temp[i] == start_id || temp[i] == end_id) {
 		        continue;
 		    }
-		    
-		    obs[obsIndex] = temp[i];
-		    obsIndex++;
+		    obs[k] = temp[i];
+		    k++;
 		}
 		
 		Arrays.sort(obs);
@@ -42,7 +40,7 @@ public class Path2 {
         for(int i=0; i<obs.length; i++) {
         	int row = (obs[i]-1)/10;
         	int col = (obs[i]-1)%10;
-        	map[row][col] = false; // obstacle
+        	map[row][col] = false; // false for obstacle
         }
         
         Grid grid = new Grid(10, 10, map);
@@ -56,7 +54,7 @@ public class Path2 {
         Point start = new Point(start_row, start_col);
         Point end = new Point(end_row, end_col);
         
-        List<Point> path = PathFinding.findPath(grid, start, end, false);
+        ArrayList<Point> path = PathFinding.findPath(grid, start, end);
         
         ArrayList<Integer> points = new ArrayList<>();
         points.add( (start.x * 10) + start.y + 1 );
@@ -136,9 +134,6 @@ class Point {
 
     @Override
     public boolean equals(Object object) {
-        // Unlikely to compare incorrect type so removed for performance
-        // if (!(obj.GetType() == typeof(PathFind.Point)))
-        //     return false;
         Point point = (Point) object;
 
         if (point.equals(null)) return false;
@@ -159,17 +154,13 @@ class Point {
         this.y = y;
         return this;
     }
-
-    @Override
-    public String toString() {
-        return "Point = {" + x +", " + y +'}';
-    }
+    
 }
 
 /**
- * A node in the grid map
+ * A cell in the grid map
  */
-class Nodep {
+class Cell {
     // node starting params
     public boolean walkable;
     public int x;
@@ -179,7 +170,7 @@ class Nodep {
     // calculated values while finding path
     public int gCost;
     public int hCost;
-    public Nodep parent;
+    public Cell parent;
 
     /**
      * Create the node
@@ -187,8 +178,8 @@ class Nodep {
      * @param y Y tile location in grid
      * @param price how much does it cost to pass this tile. less is better, but 0.0f is for non-walkable.
      */
-    public Nodep(int x, int y, float price) {
-        walkable = price != 0.0f;
+    public Cell(int x, int y, float price) {
+        walkable = (price != 0.0f);
         this.price = price;
         this.x = x;
         this.y = y;
@@ -204,69 +195,33 @@ class Nodep {
  * The grid of nodes we use to find path
  */
 class Grid {
-    public Nodep[][] nodes;
+    public Cell[][] cells;
     int gridWidth, gridHeight;
-
-    /**
-     * Create a new Grid with tile prices.
-     *
-     * @param width      Grid width
-     * @param height     Grid height
-     * @param tile_costs 2d array of floats, representing the cost of every tile.
-     *                   0.0f = unwalkable tile.
-     *                   1.0f = normal tile.
-     */
-    public Grid(int width, int height, float[][] tile_costs) {
-        gridWidth = width;
-        gridHeight = height;
-        nodes = new Nodep[width][height];
-
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                nodes[x][y] = new Nodep(x, y, tile_costs[x][y]);
-    }
 
     /**
      * Create a new grid of just walkable / unwalkable tiles.
      *
      * @param width         Grid width
      * @param height        Grid height
-     * @param walkableTiles the tilemap. true for walkable, false for blocking.
+     * @param walkableCells the tilemap. true for walkable, false for blocking.
      */
-    public Grid(int width, int height, boolean[][] walkableTiles) {
+    public Grid(int width, int height, boolean[][] walkableCells) {
         gridWidth = width;
         gridHeight = height;
-        nodes = new Nodep[width][height];
+        cells = new Cell[width][height];
 
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
-                nodes[x][y] = new Nodep(x, y, walkableTiles[x][y] ? 1.0f : 0.0f);
+                cells[x][y] = new Cell(x, y, walkableCells[x][y] ? 1.0f : 0.0f);
     }
 
-    public List<Nodep> get8Neighbours(Nodep node) {
-        List<Nodep> neighbours = new ArrayList<Nodep>();
+    public ArrayList<Cell> get4Neighbours(Cell cell) {
+        ArrayList<Cell> neighbours = new ArrayList<Cell>();
 
-        for (int x = -1; x <= 1; x++)
-            for (int y = -1; y <= 1; y++) {
-                if (x == 0 && y == 0) continue;
-
-                int checkX = node.x + x;
-                int checkY = node.y + y;
-
-                if (checkX >= 0 && checkX < gridWidth && checkY >= 0 && checkY < gridHeight)
-                    neighbours.add(nodes[checkX][checkY]);
-            }
-
-        return neighbours;
-    }
-
-    public List<Nodep> get4Neighbours(Nodep node) {
-        List<Nodep> neighbours = new ArrayList<Nodep>();
-
-        if (node.y + 1 >= 0 && node.y + 1  < gridHeight) neighbours.add(nodes[node.x][node.y + 1]); // N
-        if (node.y - 1 >= 0 && node.y - 1  < gridHeight) neighbours.add(nodes[node.x][node.y - 1]); // S
-        if (node.x + 1 >= 0 && node.x + 1  < gridHeight) neighbours.add(nodes[node.x + 1][node.y]); // E
-        if (node.x - 1 >= 0 && node.x - 1  < gridHeight) neighbours.add(nodes[node.x - 1][node.y]); // W
+        if (cell.y + 1 >= 0 && cell.y + 1  < gridHeight) neighbours.add(cells[cell.x][cell.y + 1]); // N
+        if (cell.y - 1 >= 0 && cell.y - 1  < gridHeight) neighbours.add(cells[cell.x][cell.y - 1]); // S
+        if (cell.x + 1 >= 0 && cell.x + 1  < gridHeight) neighbours.add(cells[cell.x + 1][cell.y]); // E
+        if (cell.x - 1 >= 0 && cell.x - 1  < gridHeight) neighbours.add(cells[cell.x - 1][cell.y]); // W
 
         return neighbours;
     }
@@ -277,24 +232,21 @@ class Grid {
  * Class used to find the best path from A to B.
  */
 class PathFinding {
-    /**
-     * Method you should use to get path allowing 4 directional movement
-     * @param grid grid to search in.
-     * @param startPos starting position.
-     * @param targetPos ending position.
-     * @param allowDiagonals Pass true if you want 8 directional pathfinding, false for 4 direcitonal
-     * @return
-     */
-    public static List<Point> findPath(Grid grid, Point startPos, Point targetPos, boolean allowDiagonals) {
+	
+    public static ArrayList<Point> findPath(Grid grid, Point startPos, Point targetPos) {
         // Find path
-        List<Nodep> pathInNodes = findPathNodes(grid, startPos, targetPos, allowDiagonals);
+        ArrayList<Cell> pathInCells = findPathCells(grid, startPos, targetPos);
 
         // Convert to a list of points and return
-        List<Point> pathInPoints = new ArrayList<Point>();
+        ArrayList<Point> pathInPoints = new ArrayList<Point>();
 
-        if (pathInNodes != null)
-            for (Nodep node : pathInNodes)
-                pathInPoints.add(new Point(node.x, node.y));
+        if (pathInCells != null) {
+        	for (Cell cell : pathInCells) {
+        		pathInPoints.add(new Point(cell.x, cell.y));
+        	}
+                
+        }
+            
 
         return pathInPoints;
     }
@@ -307,46 +259,54 @@ class PathFinding {
      * @param allowDiagonals Pass true if you want 8 directional pathfinding, false for 4 direcitonal
      * @return List of Node's with found path.
      */
-    private static List<Nodep> findPathNodes(Grid grid, Point startPos, Point targetPos, boolean allowDiagonals) {
-        Nodep startNode = grid.nodes[startPos.x][startPos.y];
-        Nodep targetNode = grid.nodes[targetPos.x][targetPos.y];
+    private static ArrayList<Cell> findPathCells(Grid grid, Point startPos, Point targetPos) {
+        Cell startCell = grid.cells[startPos.x][startPos.y];
+        Cell targetCell = grid.cells[targetPos.x][targetPos.y];
 
-        List<Nodep> openSet = new ArrayList<Nodep>();
-        HashSet<Nodep> closedSet = new HashSet<Nodep>();
-        openSet.add(startNode);
+        ArrayList<Cell> openSet = new ArrayList<Cell>();
+        HashSet<Cell> closedSet = new HashSet<Cell>();
+        openSet.add(startCell);
 
         while (openSet.size() > 0) {
-            Nodep currentNode = openSet.get(0);
+            Cell currentCell = openSet.get(0);
 
             for (int k = 1; k < openSet.size(); k++) {
-                Nodep open = openSet.get(k);
+                Cell open = openSet.get(k);
 
-                if (open.getFCost() < currentNode.getFCost() ||
-                        open.getFCost() == currentNode.getFCost() &&
-                                open.hCost < currentNode.hCost)
-                    currentNode = open;
+                if (open.getFCost() < currentCell.getFCost() ||
+                        open.getFCost() == currentCell.getFCost() &&
+                                open.hCost < currentCell.hCost) 
+                {
+                	currentCell = open;
+                }
+                    
             }
 
-            openSet.remove(currentNode);
-            closedSet.add(currentNode);
+            openSet.remove(currentCell);
+            closedSet.add(currentCell);
 
-            if (currentNode == targetNode)
-                return retracePath(startNode, targetNode);
+            if (currentCell == targetCell) {
+            	return retracePath(startCell, targetCell);
+            }
+                
 
-            List<Nodep> neighbours;
-            if (allowDiagonals) neighbours = grid.get8Neighbours(currentNode);
-            else neighbours = grid.get4Neighbours(currentNode);
+            ArrayList<Cell> neighbours = grid.get4Neighbours(currentCell);
 
-            for (Nodep neighbour : neighbours) {
-                if (!neighbour.walkable || closedSet.contains(neighbour)) continue;
+            for (Cell neighbour : neighbours) {
+                if (!neighbour.walkable || closedSet.contains(neighbour)) {
+                	continue;
+                }
 
-                int newMovementCostToNeighbour = currentNode.gCost + getDistance(currentNode, neighbour) * (int) (10.0f * neighbour.price);
+                int newMovementCostToNeighbour = currentCell.gCost + getDistance(currentCell, neighbour) * (int) (10.0f * neighbour.price);
                 if (newMovementCostToNeighbour < neighbour.gCost || !openSet.contains(neighbour)) {
                     neighbour.gCost = newMovementCostToNeighbour;
-                    neighbour.hCost = getDistance(neighbour, targetNode);
-                    neighbour.parent = currentNode;
+                    neighbour.hCost = getDistance(neighbour, targetCell);
+                    neighbour.parent = currentCell;
 
-                    if (!openSet.contains(neighbour)) openSet.add(neighbour);
+                    if (!openSet.contains(neighbour)) {
+                    	openSet.add(neighbour);
+                    }
+                    
                 }
             }
         }
@@ -354,26 +314,24 @@ class PathFinding {
         return null;
     }
 
-    private static List<Nodep> retracePath(Nodep startNode, Nodep endNode) {
-        List<Nodep> path = new ArrayList<Nodep>();
-        Nodep currentNode = endNode;
+    private static ArrayList<Cell> retracePath(Cell startCell, Cell endCell) {
+        ArrayList<Cell> path = new ArrayList<Cell>();
+        Cell currentCell = endCell;
 
-        while (currentNode != startNode) {
-            path.add(currentNode);
-            currentNode = currentNode.parent;
+        while (currentCell != startCell) {
+            path.add(currentCell);
+            currentCell = currentCell.parent;
         }
 
         Collections.reverse(path);
         return path;
     }
 
-    private static int getDistance(Nodep nodeA, Nodep nodeB) {
-        int distanceX = Math.abs(nodeA.x - nodeB.x);
-        int distanceY = Math.abs(nodeA.y - nodeB.y);
+    private static int getDistance(Cell cellA, Cell cellB) {
+        int distanceX = Math.abs(cellA.x - cellB.x);
+        int distanceY = Math.abs(cellA.y - cellB.y);
 
-        if (distanceX > distanceY)
-            return 14 * distanceY + 10 * (distanceX - distanceY);
-        return 14 * distanceX + 10 * (distanceY - distanceX);
+        return 10 * (distanceX + distanceY);
     }
 }
 
