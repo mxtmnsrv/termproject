@@ -61,21 +61,25 @@ public class Main extends Application {
 //                  	System.out.println(game.selectedCity.getLayoutY());
 //                  	System.out.println("-----");
                     int endID = Game.getCellID(xo, yo);
-                    game.placePath(endID);
+                    int startID = game.getCellIdByCityId(game.vehicle.getCurrentCityId());
+                    game.placePath(startID, endID);
                     game.selectedCity = null;
                     // TODO: Vehicle animation >>> Remove path line >>> Update VEHICLE!
                     
-                    PathTransition path = new PathTransition();
-                    path.setAutoReverse(false);
-                    path.setNode(game.vehicleImage);
-                    path.setPath(game.polyline);
-                    path.setDuration(Duration.seconds(3));
-                    //path.setOrientation();
-                    path.setCycleCount(1);
-                    path.play();
+//                    PathTransition path = new PathTransition();
+//                    path.setAutoReverse(false);
+//                    path.setNode(game.vehicleImage);
+//                    path.setPath(game.polyline);
+//                    path.setDuration(Duration.seconds(3));
+//                    //path.setOrientation();
+//                    path.setCycleCount(1);
+//                    path.play();
+                    
+                    // Update vehicle position!
+                    //game.vehicle.setCurrentCityId(game.getCityIdByCellId(endID));
                     
                     // Create a PauseTransition to wait for 2 seconds
-                    PauseTransition pause = new PauseTransition(Duration.seconds(50));
+                    PauseTransition pause = new PauseTransition(Duration.seconds(5));
                     // When the PauseTransition finishes, remove the polyline from the game pane
                     pause.setOnFinished(e -> {
                         game.getChildren().remove(game.polyline);

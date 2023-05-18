@@ -17,8 +17,8 @@ import javafx.scene.shape.Polyline;
 public class Game extends Pane {
 	
 	// Used in the DRIVE handler, hence public
-	public Label selectedCity;
 	public Polyline polyline;
+	public Label selectedCity;
 	public ImageView vehicleImage;
 	
 	// Constant for cell size
@@ -30,8 +30,7 @@ public class Game extends Pane {
 	private ArrayList<FixedCell> fixedList = new ArrayList<FixedCell>();
 	
 	// Vehicle and Path
-	private Vehicle vehicle = new Vehicle("1", "5"); // If new removed then error occurs
-	private Path path;
+	public Vehicle vehicle = new Vehicle("1", "5"); // If new removed then error occurs
 	
 		// This is constructor for Level that will be invoked in Main class
 		// Its parameter is the filename of the level text file
@@ -101,14 +100,25 @@ public class Game extends Pane {
 	
 		
 		// Draw a path line from the vehicle to the cell id given in the parameters
-		public void placePath(int endID) {
-			polyline = new Polyline();
+		public void placePath(int startID, int endID) {
 			
-			// It is always the cell id where vehicle is located
-			int startID = getCellIdByCityId(vehicle.getCurrentCityId());
+			ArrayList<Integer> Aobstacles = new ArrayList<>();
+			for(int i=0;i<cityList.size();i++) {
+				Aobstacles.add(cityList.get(i).getCellId());
+			}
+			for(int i=0;i<fixedList.size();i++) {
+				Aobstacles.add(fixedList.get(i).getCellId());
+			}
 			
-			Double[] points = getPoints(startID, endID);
-			polyline.getPoints().addAll(points);
+			int[] obstacles = new int[Aobstacles.size()];
+			for(int i=0;i<obstacles.length;i++) {
+				obstacles[i] = Aobstacles.get(i);
+			}
+			
+			
+			startID = getCellIdByCityId(vehicle.getCurrentCityId());
+			Path path = new Path(startID, endID, obstacles);
+			polyline = path.getPolyline();
 			getChildren().add(polyline);
 			
 		}
@@ -144,14 +154,6 @@ public class Game extends Pane {
 			
 			// Add it to the game (pane)
 			getChildren().add(label);
-//				if(true)
-//				{	
-//					image.setOnMouseClicked(e-> {
-//						path.setEndingCityId(city.getCityId());
-//					});
-//				}
-//				add(vImage,city.getCellId()%10,city.getCellId()/10);
-//				add(text,city.getCellId()%10,city.getCellId()/10);
 			
 		}
 			
@@ -201,7 +203,7 @@ public class Game extends Pane {
 		}
 			
 		// This method is used in placeVehicle() to get cell id 
-		private int getCellIdByCityId(int cityId) {
+		public int getCellIdByCityId(int cityId) {
 			for(int i=0;i<cityList.size();i++) {
 				if(cityList.get(i).getCityId() == cityId) {
 					return cityList.get(i).getCellId();
@@ -211,7 +213,7 @@ public class Game extends Pane {
 		}
 		
 		// Returns city id by the known city cell id 
-		private int getCityIdByCellId(int cellId) {
+		public int getCityIdByCellId(int cellId) {
 			for(int i=0;i<cityList.size();i++) {
 				if(cityList.get(i).getCellId() == cellId) {
 					return cityList.get(i).getCityId();
@@ -221,13 +223,13 @@ public class Game extends Pane {
 		}
 			
 		// Get value of Y coordinate that's used in setLayoutY() method
-		private static int getY(int cellID) {
+		public static int getY(int cellID) {
 			int rowID = (cellID - 1) / 10;
 			return (rowID * CELL_SIZE);
 		}
 		
 		// Get value of X coordinate that's used in setLayoutX() method
-		private static int getX(int cellID) {
+		public static int getX(int cellID) {
 			int columnID = (cellID - 1) % 10;
 			return (columnID * CELL_SIZE);
 		}
@@ -240,86 +242,86 @@ public class Game extends Pane {
 		    return cellID;
 		}
 		
-		// Returns points array that will be used in placePath() method
-		// TODO: THIS METHOD DOES NOT WORK WELL, ALGORITHM SHOULD BE IMPROVED
-		public static Double[] getPoints(int id1, int id2) {
-			int row1 = (id1 - 1)/10;
-			int col1 = (id1 - 1)%10;
-			int row2 = (id2 - 1)/10;
-			int col2 = (id2 - 1)%10;
-			
-			// Row and column differences
-			int rowd = row1 - row2;
-			int cold = col1 - col2;
-			
-			int id = id1; // starting point
-			int[] id_points = new int[Math.abs(cold)+Math.abs(rowd)+1];
-			id_points[0] = id1;
-			int k = 1;
-			
-			// X=0 : first go left/right then up/down
-			// X=1 : first go up/down then left/right
-			int X = (int) (Math.random() * 2);
-			
-			if(X == 0) {
-				for(int i=0; i<Math.abs(cold); i++) {
-					if(cold > 0) {
-						id--;
-					} else if(cold < 0) {
-						id++;
-					}
-					id_points[k] = id;
-					k++;
-				}
-				
-				for(int i=0; i<Math.abs(rowd); i++) {
-					if(rowd > 0) {
-						id-=10;
-					} else if(rowd < 0) {
-						id+=10;
-					}
-					id_points[k] = id;
-					k++;
-				}
-				
-			} else if(X == 1) {
-				for(int i=0; i<Math.abs(rowd); i++) {
-					if(rowd > 0) {
-						id-=10;
-					} else if(rowd < 0) {
-						id+=10;
-					}
-					id_points[k] = id;
-					k++;
-				}
-				
-				for(int i=0; i<Math.abs(cold); i++) {
-					if(cold > 0) {
-						id--;
-					} else if(cold < 0) {
-						id++;
-					}
-					id_points[k] = id;
-					k++;
-				}
-				
-			}
-			
-			// Convert {21, ..., 64} to {0.0, 100.0, ..., 150.0, 300.0}
-			double[] points = new double[id_points.length * 2];
-			for(int i=0, j=0; i<points.length; i+=2, j++) {
-				points[i] = getX(id_points[j]) + 25;
-				points[i+1] = getY(id_points[j]) + 25;
-			}
-			
-			// Convert double[] to Double[]
-			Double[] list = new Double[points.length];
-			for (int i = 0; i < points.length; i++) {
-			    list[i] = Double.valueOf(points[i]);
-			}
-			
-			// Return Double[]
-			return list;
-		}
+//		// Returns points array that will be used in placePath() method
+//		// TODO: THIS METHOD DOES NOT WORK WELL, ALGORITHM SHOULD BE IMPROVED
+//		public static Double[] getPoints(int id1, int id2) {
+//			int row1 = (id1 - 1)/10;
+//			int col1 = (id1 - 1)%10;
+//			int row2 = (id2 - 1)/10;
+//			int col2 = (id2 - 1)%10;
+//			
+//			// Row and column differences
+//			int rowd = row1 - row2;
+//			int cold = col1 - col2;
+//			
+//			int id = id1; // starting point
+//			int[] id_points = new int[Math.abs(cold)+Math.abs(rowd)+1];
+//			id_points[0] = id1;
+//			int k = 1;
+//			
+//			// X=0 : first go left/right then up/down
+//			// X=1 : first go up/down then left/right
+//			int X = (int) (Math.random() * 2);
+//			
+//			if(X == 0) {
+//				for(int i=0; i<Math.abs(cold); i++) {
+//					if(cold > 0) {
+//						id--;
+//					} else if(cold < 0) {
+//						id++;
+//					}
+//					id_points[k] = id;
+//					k++;
+//				}
+//				
+//				for(int i=0; i<Math.abs(rowd); i++) {
+//					if(rowd > 0) {
+//						id-=10;
+//					} else if(rowd < 0) {
+//						id+=10;
+//					}
+//					id_points[k] = id;
+//					k++;
+//				}
+//				
+//			} else if(X == 1) {
+//				for(int i=0; i<Math.abs(rowd); i++) {
+//					if(rowd > 0) {
+//						id-=10;
+//					} else if(rowd < 0) {
+//						id+=10;
+//					}
+//					id_points[k] = id;
+//					k++;
+//				}
+//				
+//				for(int i=0; i<Math.abs(cold); i++) {
+//					if(cold > 0) {
+//						id--;
+//					} else if(cold < 0) {
+//						id++;
+//					}
+//					id_points[k] = id;
+//					k++;
+//				}
+//				
+//			}
+//			
+//			// Convert {21, ..., 64} to {0.0, 100.0, ..., 150.0, 300.0}
+//			double[] points = new double[id_points.length * 2];
+//			for(int i=0, j=0; i<points.length; i+=2, j++) {
+//				points[i] = getX(id_points[j]) + 25;
+//				points[i+1] = getY(id_points[j]) + 25;
+//			}
+//			
+//			// Convert double[] to Double[]
+//			Double[] list = new Double[points.length];
+//			for (int i = 0; i < points.length; i++) {
+//			    list[i] = Double.valueOf(points[i]);
+//			}
+//			
+//			// Return Double[]
+//			return list;
+//		}
 			
 }
