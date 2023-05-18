@@ -117,7 +117,7 @@ public class Game extends Pane {
 			
 			
 			startID = getCellIdByCityId(vehicle.getCurrentCityId());
-			Path path = new Path(startID, endID, obstacles);
+			Path2 path = new Path2(startID, endID, obstacles);
 			polyline = path.getPolyline();
 			getChildren().add(polyline);
 			
