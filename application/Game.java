@@ -3,8 +3,8 @@ package application;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-
 import javafx.event.EventHandler;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -102,22 +102,22 @@ public class Game extends Pane {
 		// Draw a path line from the vehicle to the cell id given in the parameters
 		public void placePath(int startID, int endID) {
 			
-			ArrayList<Integer> Aobstacles = new ArrayList<>();
+			List<Integer> obstacles_list = new ArrayList<>();
 			for(int i=0;i<cityList.size();i++) {
-				Aobstacles.add(cityList.get(i).getCellId());
+				obstacles_list.add(cityList.get(i).getCellId());
 			}
 			for(int i=0;i<fixedList.size();i++) {
-				Aobstacles.add(fixedList.get(i).getCellId());
+				obstacles_list.add(fixedList.get(i).getCellId());
 			}
 			
-			int[] obstacles = new int[Aobstacles.size()];
+			int[] obstacles = new int[obstacles_list.size()];
 			for(int i=0;i<obstacles.length;i++) {
-				obstacles[i] = Aobstacles.get(i);
+				obstacles[i] = obstacles_list.get(i);
 			}
 			
 			
 			startID = getCellIdByCityId(vehicle.getCurrentCityId());
-			Path2 path = new Path2(startID, endID, obstacles);
+			Path path = new Path(startID, endID, obstacles);
 			polyline = path.getPolyline();
 			getChildren().add(polyline);
 			
